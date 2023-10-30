@@ -1,70 +1,145 @@
 <template>
     <div class="auth-block">
-        <h1 class="auth-block__title">Authorization</h1>
-        <form class="auth-block__form" action="" @submit.prevent>
-            <!-- Field (email) -->
-            <div class="form--field">
-                <input 
-                class="input" 
-                type="email" 
-                placeholder="email"
-                v-model="email"
-                >
-                <span class="material-symbols-outlined">
-                    alternate_email
-                </span>
-            </div>
+        <!-- Authorizate -->
+        <div class="wrapper" id="wrapper-authorizate" v-show="isAuthorizate">
+            <h1 class="auth-block__title">Authorization</h1>
+            <form class="auth-block__form" action="" @submit.prevent>
+                <!-- Field (email) -->
+                <div class="form--field">
+                    <input 
+                    class="input" 
+                    type="email" 
+                    placeholder="email"
+                    v-model="email"
+                    @input="validateEmail(email)"
+                    >
+                    <span class="material-symbols-outlined">
+                        alternate_email
+                    </span>
+                </div>
+    
+                <!-- Field (password) -->
+                <div class="form--field">
+                    <input 
+                    class="input" 
+                    type="password" 
+                    placeholder="password"
+                    v-model="password"
+                    >
+                    <span class="material-symbols-outlined">
+                        lock
+                    </span>
+                </div>
+    
+                <!-- Field (forget pswrd) -->
+                <div class="forget-password">
+                    <input 
+                    type="checkbox" 
+                    ref="checkbox" 
+                    id="checkbox" 
+                    :value="checkboxValue"
+                    v-model="isRemember"
+                    @change="e => updateInput(e)"
+                    >
+                    <p class="forget-msg" @click="triggerCheckbox">Remember Me forget password</p>
+                </div>
+                <button class="form--btn">Sign In</button>
+                <p class="not-account">Don't have a account 
+                    <a class="link" @click="activeRegistration">
+                        register
+                    </a>
+                </p>
+            </form>
+        </div>
 
-            <!-- Field (password) -->
-            <div class="form--field">
-                <input 
-                class="input" 
-                type="password" 
-                placeholder="password"
-                v-model="password"
-                >
-                <span class="material-symbols-outlined">
-                    lock
-                </span>
-            </div>
-
-            <!-- Field (forget pswrd) -->
-            <div class="forget-password">
-                <input 
-                type="checkbox" 
-                ref="checkbox" 
-                id="checkbox" 
-                :value="checkboxValue"
-                v-model="isRemember"
-                @change="e => updateInput(e)"
-                >
-                <p class="forget-msg" @click="triggerCheckbox">Remember Me forget password</p>
-            </div>
-            <button class="form--btn">Sign In</button>
-            <p class="not-account">Don't have a account <a class="link">register</a></p>
-        </form>
+        <!-- Register -->
+        <div class="wrapper" id="wrapper-register" v-show="isRegister">
+            <h1 class="auth-block__title">Sign Up</h1>
+            <form class="auth-block__form" action="" @submit.prevent>
+                <!-- Field (login) -->
+                <div class="form--field">
+                    <input 
+                    class="input" 
+                    type="email" 
+                    placeholder="login"
+                    v-model="login"
+                    >
+                    <span class="material-symbols-outlined">
+                        alternate_email
+                    </span>
+                </div>
+    
+                <!-- Field (password) -->
+                <div class="form--field">
+                    <input 
+                    class="input" 
+                    type="password" 
+                    placeholder="password"
+                    v-model="password"
+                    >
+                    <span class="material-symbols-outlined">
+                        lock
+                    </span>
+                </div>
+    
+                <button class="form--btn" id="btn-sign-up">Sign Up</button>
+                <p class="already-account">Already have an account? 
+                    <a class="link" @click="activeAuthorizate">
+                        sign in ->
+                    </a>
+                </p>
+            </form>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import gsap from 'gsap';
 
 // Elements
 const checkbox = ref<null | HTMLInputElement>(null);
 
 // Boolean
 const isRemember = ref<boolean>(false);
+const isRegister = ref<boolean>(false);
+const isAuthorizate = ref<boolean>(true);
 
 // Data
 const checkboxValue = ref<string>('remember password');
 const email = ref<string>('');
 const password = ref<string>('');
+const login = ref<string>('');
 
 // Functions
 function triggerCheckbox():void {
     checkbox.value?.click();
 }
 function updateInput(e: any) { /* */ }
+
+function validateEmail(email: string): void {
+    const regex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+    console.log(regex.test(email));
+    if((regex.test(email))) {
+        console.log('Ты правильный долбаеб!');
+    } else {
+        console.log('Ты долбаеб не правильный!');
+    }
+}
+
+// Включить окно РЕГИСТРАЦИИ
+function activeRegistration(){
+    Promise.resolve(gsap.to('#wrapper-authorizate', { bottom: '80vh', duration: 0.4 }))
+        .then(() => isAuthorizate.value = false)
+        .then(() => isRegister.value = true)
+        .then(() => gsap.to('#wrapper-register', { bottom: '0vh', duration: 0.4 }))
+}
+function activeAuthorizate() {
+    Promise.resolve(gsap.to('#wrapper-register', { bottom: '-80vh', duration: 0.4 }))
+        .then(() => isRegister.value = false)
+        .then(() => isAuthorizate.value = true)
+        .then(() => gsap.to('#wrapper-authorizate', { bottom: '0vh', duration: 0.4 }))
+}
 
 </script>
 
@@ -89,12 +164,21 @@ body {
     font-family: monospace;
 }
 .auth-block {
+    width: 420px;
+    height: 420px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     padding: 60px 30px 70px 30px;
     border-radius: 20px;
     border: 2px solid rgb(22, 160, 160);
     box-shadow: 6px 15px 25px rgba(0, 0, 0, 0.212);
+}
+.wrapper {
+    position: relative;
+}
+#wrapper-register {
+    bottom: -80vh;    
 }
 .auth-block__title {
     position: relative;
@@ -102,8 +186,8 @@ body {
     font-size: 42px;
     margin: 0 30px 30px 30px;
 }
-
 .auth-block__form {
+    position: relative;
     display: flex;
     flex-direction: column;
 }
@@ -137,7 +221,7 @@ body {
     align-items: center;
 }
 .form--field + .form--field {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 .forget-password {
     display: flex;
@@ -167,11 +251,19 @@ body {
     letter-spacing: 1px;
     cursor: pointer;
 }
+#btn-sign-up {
+    margin-top: 20px;
+}
 .not-account {
     font-size: 16px;
     align-self: center;
     margin-top: 20px;
-    /* color: rgb(40, 146, 146); */
+    font-weight: bold;
+}
+.already-account {
+    font-size: 16px;
+    align-self: center;
+    margin-top: 30px;
     font-weight: bold;
 }
 .link {
